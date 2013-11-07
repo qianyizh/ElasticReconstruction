@@ -25,6 +25,11 @@ as to minimize the alignment error. It takes fragments, dense correspondences,
 and an initial camera pose trajectory as input, and outputs control lattices
 for the fragments. See its readme for more information.
 
++ BuildFragment
+This module calls KinectFusion in PCL and creates short-term fragments from
+the raw RGB-D stream. Ralative poses from depth frames to the corresponding
+fragment are also recorded and stored in a .log file.
+
 + BuildCorrespondence
 This is a pre-processing step of FragmentOptimizer. It takes fragments and an
 initial camera pose trajectory as input, applies ICP registration and outputs
@@ -45,7 +50,11 @@ We strongly recommend you install Point Cloud Library (PCL) for Windows.
 http://pointclouds.org/
 
 Although the main module (FragmentOptimizer) can be de-PCL-ed easily, it would
-save you a LOT of trouble if you have experiences with PCL.
+save you a LOT of trouble if you have experiences with PCL. Other modules are 
+all heavily relying on PCL.
+
+FragmentOptimizer uses SuiteSparse and a different version of Eigen. They both
+are included in the "external" directory under the project.
 
 ==============================================================================
 Quick Start
