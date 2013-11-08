@@ -64,33 +64,14 @@ void COptApp::InitIPose()
 	}
 
 	Eigen::Matrix4d basepose = Eigen::Matrix4d::Identity();
-	if ( length_ < 2.0 ) {
-		basepose( 0, 3 ) = length_ / 2.0;
-		basepose( 1, 3 ) = length_ / 2.0;
-		basepose( 2, 3 ) = - 0.6;
-	} else {
-		basepose( 0, 3 ) = length_ / 2.0;
-		basepose( 1, 3 ) = length_ / 2.0;
-		basepose( 2, 3 ) = - 0.3;
-	}
+	basepose( 0, 3 ) = length_ / 2.0;
+	basepose( 1, 3 ) = length_ / 2.0;
+	basepose( 2, 3 ) = - 0.3;
 	
 	Eigen::Matrix4d baseinverse = basepose.inverse();
 
-	Eigen::Matrix4d globalbasepose = Eigen::Matrix4d::Identity();
-	if ( global_length_ < 2.0 ) {
-		globalbasepose( 0, 3 ) = global_length_ / 2.0;
-		globalbasepose( 1, 3 ) = global_length_ / 2.0;
-		globalbasepose( 2, 3 ) = - 0.6;
-	} else {
-		globalbasepose( 0, 3 ) = global_length_ / 2.0;
-		globalbasepose( 1, 3 ) = global_length_ / 2.0;
-		globalbasepose( 2, 3 ) = - 0.3;
-	}
-
-	Eigen::Matrix4d leftbase = globalbasepose * rgbd_traj_.data_[ 0 ].transformation_.inverse();
+	Eigen::Matrix4d leftbase = basepose * rgbd_traj_.data_[ 0 ].transformation_.inverse();
 	ipose_.resize( num_ );
-	pose_.resize( num_ );
-	pose_rot_t_.resize( num_ );
 
 	for ( int i = 0; i < num_; i++ ) {
 		int ii = relative2absolute_map_[ i ];
@@ -139,7 +120,7 @@ void COptApp::InitCorrespondences()
 			memset( filename, 0, 1024 );
 			sprintf( filename, "%scorres_%d_%d.txt", dir_prefix_.c_str(), reg_traj_.data_[ i ].id1_, reg_traj_.data_[ i ].id2_ );
 			corres_.back().trans_ = reg_traj_.data_[ i ].transformation_;
-			corres_.back().loadFromFile( filename );
+			corres_.back().LoadFromFile( filename );
 			PCL_INFO( "Read %s, get %d correspondences.\n", filename, corres_.back().corres_.size() );
 			//cout << filename << " - " << reg_traj_.data_[ i ].frame_ << " : " << corres_.back().corres_.size() << endl;
 		}

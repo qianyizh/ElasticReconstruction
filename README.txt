@@ -46,7 +46,7 @@ input, and outputs a deformed RGB-D stream.
 ==============================================================================
 Dependencies
 
-We strongly recommend you install Point Cloud Library (PCL) for Windows.
+We strongly recommend you install Point Cloud Library (PCL) x64 for Windows.
 http://pointclouds.org/
 
 Although the main module (FragmentOptimizer) can be de-PCL-ed easily, it would

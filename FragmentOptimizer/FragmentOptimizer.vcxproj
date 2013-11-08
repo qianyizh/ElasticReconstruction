@@ -122,12 +122,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files\PCL\include\pcl-1.7;C:\Program Files\Boost\include;$(ProjectDir)\external\SuiteSparse\Include;$(ProjectDir)\external</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Program Files\PCL\lib;C:\Program Files\Boost\lib;$(ProjectDir)\external\SuiteSparse\Lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pcl_common_release.lib;pcl_io_release.lib;libboost_date_time-vc100-mt-1_49.lib;CHOLMOD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
