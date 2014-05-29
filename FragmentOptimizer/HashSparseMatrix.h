@@ -30,5 +30,8 @@ public:
 	void AddHessian( int idx1[], double val1[], int n1, int idx2[], double val2[], int n2, TripletVector & data );
 	void AddHessian2( int idx[], double val[], TripletVector & data );
 	void Add( int i, int j, double value, TripletVector & data );
+
+	void AddJb( int idx[], double val[], int n, double b, Eigen::VectorXd & Jb );
+	void AddJb( int i, double value, double b, Eigen::VectorXd & Jb );
 };
 

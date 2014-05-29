@@ -17,6 +17,7 @@ COptApp::COptApp(void)
 	, conv_score_( 0.01 )
 	, ctr_filename_( "output.ctr" )
 	, sample_filename_( "sample.pcd" )
+	, pose_filename_( "pose.log" )
 	, init_ctr_file_( "" )
 	, dir_prefix_( "" )
 	, sample_num_( -1 )
@@ -26,17 +27,6 @@ COptApp::COptApp(void)
 
 COptApp::~COptApp(void)
 {
-}
-
-void COptApp::Init()
-{
-	InitMap();
-	unit_length_ = length_ / resolution_;
-	nper_ = ( resolution_ + 1 ) * ( resolution_ + 1 ) * ( resolution_ + 1 ) * 3;
-	matrix_size_ = nper_ * num_;
-	InitIPose();
-	InitPointClouds();
-	InitCorrespondences();
 }
 
 void COptApp::InitMap()
@@ -127,9 +117,18 @@ void COptApp::InitCorrespondences()
 	}
 }
 
-void COptApp::Optimize()
+void COptApp::OptimizeNonrigid()
 {
-	PCL_WARN( "Optimization with weight %.5f, resolution %d, piece number %d, max iteration %d\n", weight_, resolution_, num_, max_iteration_ );
+	PCL_WARN( "Nonrigid optimization.\n" );
+	PCL_INFO( "Parameters: weight %.5f, resolution %d, piece number %d, max iteration %d\n", weight_, resolution_, num_, max_iteration_ );
+
+	InitMap();
+	unit_length_ = length_ / resolution_;
+	nper_ = ( resolution_ + 1 ) * ( resolution_ + 1 ) * ( resolution_ + 1 ) * 3;
+	matrix_size_ = nper_ * num_;
+	InitIPose();
+	InitPointClouds();
+	InitCorrespondences();
 
 	Eigen::VectorXd ctr( matrix_size_ );
 	Eigen::VectorXd ictr( matrix_size_ );
@@ -151,14 +150,13 @@ void COptApp::Optimize()
 		int nprocessed = 0;
 		for ( int l = 0; l < num_; l++ ) {
 			pointclouds_[ l ].UpdateAllNormal( ctr );
-			//cout << pointclouds_[ l ].points_[ 99 ].n_[ 0 ] << ", " << pointclouds_[ l ].points_[ 99 ].n_[ 1 ] << ", " << pointclouds_[ l ].points_[ 99 ].n_[ 2 ] << endl;
 		}
 
 		thisAA = baseAA;
 
 		PCL_INFO( "Processing %d : %5d", corres_.size(), 0 );
 
-		#pragma omp parallel for num_threads( 8 ) schedule( dynamic )
+#pragma omp parallel for num_threads( 8 ) schedule( dynamic )
 		for ( int l = 0; l < ( int )corres_.size(); l++ ) {
 			int i = corres_[ l ].idx0_;
 			int j = corres_[ l ].idx1_;
@@ -166,8 +164,6 @@ void COptApp::Optimize()
 			HashSparseMatrix mati( i * nper_, i * nper_ );
 			HashSparseMatrix matj( j * nper_, j * nper_ );
 			HashSparseMatrix matij( i * nper_, j * nper_ );
-
-			//cout << l << ": " << i << ", " << j << "in" << endl;
 
 			int idx1[ 24 ], idx2[ 24 ];
 			double val1[ 24 ], val2[ 24 ];
@@ -197,35 +193,22 @@ void COptApp::Optimize()
 				matj.AddHessian( idx2, val2, 24, tri );
 				matij.AddHessian( idx1, val1, 24, idx2, val2, 24, tri );
 			}
-			/*
-			if ( i == 0 && j == 1 ) {
-				for ( int iii = 1100; iii < 1200; iii++ ) {
-					cout << tri[ iii ].m_row << ", " << tri[ iii ].m_col << ": " << tri[ iii ].m_value << endl;
-				}
-			}
-			*/
 
 			SparseMatrix tempAA( matrix_size_, matrix_size_ );
 			tempAA.setFromTriplets( tri.begin(), tri.end() );
 
-			#pragma omp critical
+#pragma omp critical
 			{
 				nprocessed++;
 				thisAA += tempAA;
-				//cout << l << ": " << i << ", " << j << "out" << endl;
-				//PCL_INFO( "%d / %d processed\n", nprocessed, corres_.size() );
 				PCL_INFO( "\b\b\b\b\b%5d", nprocessed );
 			}
 		}
 		PCL_INFO( " ... Done.\n" );
 
-		//Eigen::saveMarket(thisAA, "thisAA.mtx");
-
 		Eigen::CholmodSupernodalLLT< SparseMatrix, Eigen::Upper > solver;
-		//Eigen::ConjugateGradient< SparseMatrix, Eigen::Upper > solver;
 		solver.analyzePattern( thisAA );
 		solver.factorize( thisAA );
-		//solver.setMaxIterations( max_pcg_iteration_ );
 
 		if ( sample_num_ > 0 ) {
 			char filename[ 1024 ];
@@ -274,21 +257,9 @@ void COptApp::Optimize()
 					}
 				}
 			}
-			//PCL_INFO( "b estimated, now solve linear system.\n" );
 		
 			oldctr = ctr;
-
-			/*
-			Eigen::ConjugateGradient< SparseMatrix, Eigen::Upper > solver;
-			solver.setMaxIterations( max_pcg_iteration_ );
-			ctr = solver.compute( thisAA ).solveWithGuess( Ab, oldctr );
-			*/
-			//ctr = solver.compute( thisAA ).solve( Ab );
-			//Eigen::CholmodSupernodalLLT< SparseMatrix, Eigen::Upper > solver;
-			//ctr = solver.compute( thisAA ).solve( Ab );
-
 			ctr = solver.solve( Ab );
-			//ctr = solver.solveWithGuess( Ab, oldctr );
 
 			score = ( oldctr - ctr ).norm();
 			PCL_WARN( "Iteration #%d:%d (%d:%d) : score is %.4f\n", itr + 1, m + 1, max_iteration_, max_inner_iteration_, score );
@@ -300,21 +271,9 @@ void COptApp::Optimize()
 				SaveCtr( ctr, filename );
 			}
 
-
 			if ( score < conv_score_ ) {
 				break;
 			}
-
-			/*
-			for ( int kkk = 0; kkk < 20; kkk++ ) {
-				cout << Ab( kkk ) << endl;
-			}
-			cout << endl;
-
-			for ( int kkk = 0; kkk < 20; kkk++ ) {
-				cout << ctr( kkk ) << endl;
-			}
-			*/
 		}
 
 		if ( score < conv_score_ ) {
@@ -324,6 +283,404 @@ void COptApp::Optimize()
 
 	SaveCtr( ctr, ctr_filename_ );
 	SavePoints( ctr, sample_filename_ );
+}
+
+void COptApp::OptimizeRigid()
+{
+	PCL_WARN( "Rigid optimization.\n" );
+	PCL_INFO( "Parameters: resolution %d, piece number %d, max iteration %d\n", resolution_, num_, max_iteration_ );
+
+	InitMap();
+	unit_length_ = length_ / resolution_;
+	nper_ = ( resolution_ + 1 ) * ( resolution_ + 1 ) * ( resolution_ + 1 ) * 3;
+	matrix_size_ = 6 * num_;			// rigid only
+	InitIPose();
+	InitPointClouds();
+	InitCorrespondences();
+
+	rgbd_traj_.data_.clear();
+	for ( int i = 0; i < ( int )ipose_.size(); i++ ) {
+		rgbd_traj_.data_.push_back( FramedTransformation( i, i, i + 1, ipose_[ i ] ) );
+		pose_[ i ] = ipose_[ i ];
+		pointclouds_[ i ].UpdatePose( pose_[ i ].cast< float >() );
+	}
+
+	for ( int itr = 0; itr < max_iteration_; itr++ ) {
+		Eigen::VectorXd thisJb( matrix_size_ );
+		SparseMatrix thisJJ( matrix_size_, matrix_size_ );
+
+		thisJb.setZero();
+		thisJJ.setZero();
+
+		double thisscore = 0.0;
+		int nprocessed = 0;
+
+		PCL_INFO( "Processing %d : %5d", corres_.size(), 0 );
+
+#pragma omp parallel for num_threads( 8 ) schedule( dynamic )
+		for ( int l = 0; l < ( int )corres_.size(); l++ ) {
+			int i = corres_[ l ].idx0_;
+			int j = corres_[ l ].idx1_;
+			TripletVector tri;
+			HashSparseMatrix mat_adder( 0, 0 );
+			Eigen::VectorXd tempJb( matrix_size_ );
+			SparseMatrix tempJJ( matrix_size_, matrix_size_ );
+			tempJb.setZero();
+			tempJJ.setZero();
+
+			for ( int k = 0; k < 6; k++ ) {
+				mat_adder.Add( k, k, 1, tri );
+			}
+
+			int idx[ 12 ];
+			double val[ 12 ];
+			double b;
+			double score = 0.0;
+
+			for ( int k = 0; k < ( int )corres_[ l ].corres_.size(); k++ ) {
+				int ii = corres_[ l ].corres_[ k ].first;
+				int jj = corres_[ l ].corres_[ k ].second;
+				Point & pi = pointclouds_[ i ].points_[ ii ];
+				Point & pj = pointclouds_[ j ].points_[ jj ];
+				Eigen::Vector4d ppi( pi.p_[ 0 ], pi.p_[ 1 ], pi.p_[ 2 ], 1.0 );
+				Eigen::Vector4d ppj( pj.p_[ 0 ], pj.p_[ 1 ], pj.p_[ 2 ], 1.0 );
+				Eigen::Vector4d npi( pi.n_[ 0 ], pi.n_[ 1 ], pi.n_[ 2 ], 0.0 );
+				Eigen::Vector4d npj( pj.n_[ 0 ], pj.n_[ 1 ], pj.n_[ 2 ], 0.0 );
+
+				b = ( ppi - ppj ).dot( npi );
+				score += b * b;
+
+				idx[ 0 ] = i * 6;
+				idx[ 1 ] = i * 6 + 1;
+				idx[ 2 ] = i * 6 + 2;
+				idx[ 3 ] = i * 6 + 3;
+				idx[ 4 ] = i * 6 + 4;
+				idx[ 5 ] = i * 6 + 5;
+				idx[ 6 ] = j * 6;
+				idx[ 7 ] = j * 6 + 1;
+				idx[ 8 ] = j * 6 + 2;
+				idx[ 9 ] = j * 6 + 3;
+				idx[ 10 ] = j * 6 + 4;
+				idx[ 11 ] = j * 6 + 5;
+
+				val[ 0 ] = Eigen::Vector4d( 0, -ppi( 2 ), ppi( 1 ), 1 ).dot( npi ) + Eigen::Vector4d( 0, -npi( 2 ), npi( 1 ), 0 ).dot( ppi - ppj );
+				val[ 1 ] = Eigen::Vector4d( ppi( 2 ), 0, -ppi( 0 ), 1 ).dot( npi ) + Eigen::Vector4d( npi( 2 ), 0, -npi( 0 ), 0 ).dot( ppi - ppj );
+				val[ 2 ] = Eigen::Vector4d( -ppi( 1 ), ppi( 0 ), 0, 1 ).dot( npi ) + Eigen::Vector4d( -npi( 1 ), npi( 0 ), 0, 0 ).dot( ppi - ppj );
+				val[ 3 ] = npi( 0 );
+				val[ 4 ] = npi( 1 );
+				val[ 5 ] = npi( 2 );
+				val[ 6 ] = -Eigen::Vector4d( 0, -ppj( 2 ), ppj( 1 ), 1 ).dot( npi );
+				val[ 7 ] = -Eigen::Vector4d( ppj( 2 ), 0, -ppj( 0 ), 1 ).dot( npi );
+				val[ 8 ] = -Eigen::Vector4d( -ppj( 1 ), ppj( 0 ), 0, 1 ).dot( npi );
+				val[ 9 ] = -npi( 0 );
+				val[ 10 ] = -npi( 1 );
+				val[ 11 ] = -npi( 2 );
+
+				mat_adder.AddHessian( idx, val, 12, tri );
+				mat_adder.AddJb( idx, val, 12, b, tempJb );
+			}
+
+			tempJJ.setFromTriplets( tri.begin(), tri.end() );
+
+#pragma omp critical
+			{
+				nprocessed++;
+				thisscore += score;
+				thisJJ += tempJJ;
+				thisJb += tempJb;
+				PCL_INFO( "\b\b\b\b\b%5d", nprocessed );
+			}
+		}
+		PCL_INFO( " ... Done.\n" );
+		PCL_INFO( "Error score is : %.2f\n", thisscore );
+
+		Eigen::CholmodSupernodalLLT< SparseMatrix, Eigen::Upper > solver;
+		solver.analyzePattern( thisJJ );
+		solver.factorize( thisJJ );
+
+		Eigen::VectorXd result = - solver.solve( thisJb );
+
+		for ( int l = 0; l < num_; l++ ) {
+			Eigen::Affine3d aff_mat;
+			aff_mat.linear() = ( Eigen::Matrix3d ) Eigen::AngleAxisd( result( l * 6 + 2 ), Eigen::Vector3d::UnitZ() )
+				* Eigen::AngleAxisd( result( l * 6 + 1 ), Eigen::Vector3d::UnitY() )
+				* Eigen::AngleAxisd( result( l * 6 + 0 ), Eigen::Vector3d::UnitX() );
+			aff_mat.translation() = Eigen::Vector3d( result( l * 6 + 3 ), result( l * 6 + 4 ), result( l * 6 + 5 ) );
+			pose_[ l ] = aff_mat.matrix() * pose_[ l ];
+			pointclouds_[ l ].UpdatePose( aff_mat.matrix().cast< float >() );
+		}
+	}
+
+	output_traj_.data_.clear();
+	for ( int i = 0; i < ( int )pose_.size(); i++ ) {
+		output_traj_.data_.push_back( FramedTransformation( i, i, i + 1, pose_[ i ] ) );
+	}
+	output_traj_.SaveToFile( pose_filename_ );
+
+	Eigen::VectorXd ctr( nper_ * num_ );
+	Pose2Ctr( pose_, ctr );
+	SaveCtr( ctr, ctr_filename_ );
+	SavePoints( ctr, sample_filename_ );
+}
+
+void COptApp::OptimizeSLAC()
+{
+	PCL_WARN( "SLAC optimization.\n" );
+	PCL_INFO( "Parameters: weight %.5f, resolution %d, piece number %d, max iteration %d\n", weight_, resolution_, num_, max_iteration_ );
+
+	double default_weight = num_ * weight_;
+
+	InitMap();
+	unit_length_ = length_ / resolution_;
+	nper_ = ( resolution_ + 1 ) * ( resolution_ + 1 ) * ( resolution_ + 1 ) * 3;
+	matrix_size_ = 6 * num_ + nper_;
+	InitIPose();
+	InitPointClouds();
+	InitCorrespondences();
+
+	Eigen::VectorXd ictr( matrix_size_ );
+	Eigen::VectorXd thisCtr( matrix_size_ );
+	InitCtrSLAC( ictr, thisCtr );
+	Eigen::VectorXd expand_ctr( nper_ * num_ );
+
+	rgbd_traj_.data_.clear();
+	for ( int i = 0; i < ( int )ipose_.size(); i++ ) {
+		rgbd_traj_.data_.push_back( FramedTransformation( i, i, i + 1, ipose_[ i ] ) );
+		pose_[ i ] = ipose_[ i ];
+		pose_rot_t_[ i ] = pose_[ i ].block< 3, 3 >( 0, 0 ).transpose();
+		pointclouds_[ i ].UpdatePose( pose_[ i ].cast< float >() );
+	}
+
+	{
+		pcl::ScopeTime ttime( "Neat Optimization" );
+
+		SparseMatrix baseJJ( matrix_size_, matrix_size_ );
+		InitBaseJJ( baseJJ );
+
+		baseJJ *= default_weight;
+
+		for ( int itr = 0; itr < max_iteration_; itr++ ) {
+			Eigen::VectorXd thisJb( matrix_size_ );
+			Eigen::MatrixXd thisJJ( baseJJ.triangularView< Eigen::Upper >() );
+			Eigen::VectorXd result;
+
+			thisJJ( 0, 0 ) += 1.0;
+			thisJJ( 1, 1 ) += 1.0;
+			thisJJ( 2, 2 ) += 1.0;
+			thisJJ( 3, 3 ) += 1.0;
+			thisJJ( 4, 4 ) += 1.0;
+			thisJJ( 5, 5 ) += 1.0;
+
+			thisJb.setZero();
+
+			double thisscore = 0.0;
+			int nprocessed = 0;
+
+			PCL_INFO( "Processing %d : %5d", corres_.size(), 0 );
+
+#pragma omp parallel for num_threads( 8 ) schedule( dynamic )
+			for ( int l = 0; l < ( int )corres_.size(); l++ ) {
+				int i = corres_[ l ].idx0_;
+				int j = corres_[ l ].idx1_;
+				const int buck_size = 12 + 24 * 2;
+				int idx[ buck_size ];
+				double val[ buck_size ];
+				double b;
+				double score = 0.0;
+				Eigen::MatrixXd tempJJ( matrix_size_, matrix_size_ );
+				tempJJ.setZero();
+				Eigen::VectorXd tempJb( matrix_size_ );
+				tempJb.setZero();
+
+				for ( int k = 0; k < ( int )corres_[ l ].corres_.size(); k++ ) {
+					int ii = corres_[ l ].corres_[ k ].first;
+					int jj = corres_[ l ].corres_[ k ].second;
+					Point & pi = pointclouds_[ i ].points_[ ii ];
+					Point & pj = pointclouds_[ j ].points_[ jj ];
+					Eigen::Vector3d ppi( pi.p_[ 0 ], pi.p_[ 1 ], pi.p_[ 2 ] );
+					Eigen::Vector3d ppj( pj.p_[ 0 ], pj.p_[ 1 ], pj.p_[ 2 ] );
+					Eigen::Vector3d npi( pi.n_[ 0 ], pi.n_[ 1 ], pi.n_[ 2 ] );
+					Eigen::Vector3d npj( pj.n_[ 0 ], pj.n_[ 1 ], pj.n_[ 2 ] );
+					Eigen::Vector3d diff = ppi - ppj;
+					b = diff.dot( npi );
+					score += b * b;
+
+					idx[ 0 ] = i * 6;
+					idx[ 1 ] = i * 6 + 1;
+					idx[ 2 ] = i * 6 + 2;
+					idx[ 3 ] = i * 6 + 3;
+					idx[ 4 ] = i * 6 + 4;
+					idx[ 5 ] = i * 6 + 5;
+					idx[ 6 ] = j * 6;
+					idx[ 7 ] = j * 6 + 1;
+					idx[ 8 ] = j * 6 + 2;
+					idx[ 9 ] = j * 6 + 3;
+					idx[ 10 ] = j * 6 + 4;
+					idx[ 11 ] = j * 6 + 5;
+
+					Eigen::Vector3d temp = ppj.cross( npi );
+
+					val[ 0 ] = temp( 0 );
+					val[ 1 ] = temp( 1 );
+					val[ 2 ] = temp( 2 );
+					val[ 3 ] = npi( 0 );
+					val[ 4 ] = npi( 1 );
+					val[ 5 ] = npi( 2 );
+					val[ 6 ] = -temp( 0 );
+					val[ 7 ] = -temp( 1 );
+					val[ 8 ] = -temp( 2 );
+					val[ 9 ] = -npi( 0 );
+					val[ 10 ] = -npi( 1 );
+					val[ 11 ] = -npi( 2 );
+
+					// next part of Jacobian
+					// deal with control lattices
+					Eigen::Vector3d dTi = pose_rot_t_[ i ] * npi;
+					Eigen::Vector3d dTj = - pose_rot_t_[ j ] * npi;
+
+					for ( int ll = 0; ll < 8; ll++ ) {
+						for ( int xyz = 0; xyz < 3; xyz++ ) {
+							idx[ 12 + ll * 3 + xyz ] = 6 * num_ + pi.idx_[ ll ] + xyz;
+							val[ 12 + ll * 3 + xyz ] = pi.val_[ ll ] * dTi( xyz );
+						}
+					}
+
+					for ( int ll = 0; ll < 8; ll++ ) {
+						for ( int xyz = 0; xyz < 3; xyz++ ) {
+							idx[ 12 + 24 + ll * 3 + xyz ] = 6 * num_ + pj.idx_[ ll ] + xyz;
+							val[ 12 + 24 + ll * 3 + xyz ] = pj.val_[ ll ] * dTj( xyz );
+						}
+					}
+
+					for ( int i = 0; i < buck_size; i++ ) {
+						tempJJ( idx[ i ], idx[ i ] ) += val[ i ] * val[ i ];
+						for ( int j = i + 1; j < buck_size; j++ ) {
+							if ( idx[ i ] == idx[ j ] ) {
+								tempJJ( idx[ i ], idx[ j ] ) += 2 * val[ i ] * val[ j ];
+							} else if ( idx[ i ] < idx[ j ] ) {
+								tempJJ( idx[ i ], idx[ j ] ) += val[ i ] * val[ j ];
+							} else {
+								tempJJ( idx[ j ], idx[ i ] ) += val[ i ] * val[ j ];
+							}
+						}
+						tempJb( idx[ i ] ) += b * val[ i ];
+					}
+				}
+
+#pragma omp critical
+				{
+					nprocessed++;
+					thisscore += score;
+					thisJJ += tempJJ;
+					thisJb += tempJb;
+					PCL_INFO( "\b\b\b\b\b%5d", nprocessed );
+				}
+			}
+			PCL_INFO( " ... Done.\n" );
+			PCL_INFO( "Data error score is : %.2f\n", thisscore );
+
+			SparseMatrix thisSparseJJ = thisJJ.sparseView();
+			Eigen::CholmodSupernodalLLT< SparseMatrix, Eigen::Upper > solver;
+			solver.analyzePattern( thisSparseJJ );
+			solver.factorize( thisSparseJJ );
+
+			Eigen::VectorXd tempCtr( thisCtr );
+
+			// regularizer
+
+			Eigen::VectorXd dataJb( thisJb );
+
+			Eigen::VectorXd baseJb( matrix_size_ );
+			baseJb.setZero();
+
+			double regscore = 0.0;
+			for ( int i = 0; i <= resolution_; i++ ) {
+				for ( int j = 0; j <= resolution_; j++ ) {
+					for ( int k = 0; k <= resolution_; k++ ) {
+						int idx = GetIndex( i, j, k ) * 3 + 6 * num_;
+						std::vector< int > idxx;
+						if ( i > 0 ) {
+							idxx.push_back( GetIndex( i - 1, j, k ) * 3 + 6 * num_ );
+						}
+						if ( i < resolution_) {
+							idxx.push_back( GetIndex( i + 1, j, k ) * 3 + 6 * num_ );
+						}
+						if ( j > 0 ) {
+							idxx.push_back( GetIndex( i, j - 1, k ) * 3 + 6 * num_ );
+						}
+						if ( j < resolution_) {
+							idxx.push_back( GetIndex( i, j + 1, k ) * 3 + 6 * num_ );
+						}
+						if ( k > 0 ) {
+							idxx.push_back( GetIndex( i, j, k - 1 ) * 3 + 6 * num_ );
+						}
+						if ( k < resolution_) {
+							idxx.push_back( GetIndex( i, j, k + 1 ) * 3 + 6 * num_ );
+						}
+
+						Eigen::Matrix3d R;
+						if ( i == resolution_ / 2 && j == resolution_ / 2 && k == 0 ) {
+							// anchor point, Rotation matrix is always identity
+							R = R.Identity();
+						} else {
+							R = GetRotation( idx, idxx, ictr, tempCtr );
+						}
+
+						for ( int t = 0; t < ( int )idxx.size(); t++ ) {
+							Eigen::Vector3d bx = Eigen::Vector3d( tempCtr( idx ) - tempCtr( idxx[ t ] ), tempCtr( idx + 1 ) - tempCtr( idxx[ t ] + 1 ), tempCtr( idx + 2 ) - tempCtr( idxx[ t ] + 2 ) )
+								- R * Eigen::Vector3d( ictr( idx ) - ictr( idxx[ t ] ), ictr( idx + 1 ) - ictr( idxx[ t ] + 1 ), ictr( idx + 2 ) - ictr( idxx[ t ] + 2 ) );
+							regscore += default_weight * bx.transpose() * bx;
+							baseJb( idx ) += bx( 0 ) * default_weight;
+							baseJb( idxx[ t ] ) -= bx( 0 ) * default_weight;
+							baseJb( idx + 1 ) += bx( 1 ) * default_weight;
+							baseJb( idxx[ t ] + 1 ) -= bx( 1 ) * default_weight;
+							baseJb( idx + 2 ) += bx( 2 ) * default_weight;
+							baseJb( idxx[ t ] + 2 ) -= bx( 2 ) * default_weight;
+						}
+					}
+				}
+			}
+			thisJb = dataJb + baseJb;
+
+			PCL_INFO( "Regularization error score is : %.2f\n", regscore );
+
+			result = - solver.solve( thisJb );
+
+			for ( int l = 0; l < nper_; l++ ) {
+				tempCtr( num_ * 6 + l ) = thisCtr( num_ * 6 + l ) + result( num_ * 6 + l );
+			}
+
+			for ( int l = 0; l < nper_; l++ ) {
+				thisCtr( num_ * 6 + l ) += result( num_ * 6 + l );
+			}
+
+			for ( int l = 0; l < num_; l++ ) {
+				Eigen::Affine3d aff_mat;
+				aff_mat.linear() = ( Eigen::Matrix3d ) Eigen::AngleAxisd( result( l * 6 + 2 ), Eigen::Vector3d::UnitZ() )
+					* Eigen::AngleAxisd( result( l * 6 + 1 ), Eigen::Vector3d::UnitY() )
+					* Eigen::AngleAxisd( result( l * 6 + 0 ), Eigen::Vector3d::UnitX() );
+				aff_mat.translation() = Eigen::Vector3d( result( l * 6 + 3 ), result( l * 6 + 4 ), result( l * 6 + 5 ) );
+				//cout << aff_mat.matrix() << endl << endl;
+				// update
+				pose_[ l ] = aff_mat.matrix() * pose_[ l ];
+				pose_rot_t_[ l ] = pose_[ l ].block< 3, 3 >( 0, 0 ).transpose();
+			}
+			ExpandCtr( thisCtr, expand_ctr );
+			for ( int l = 0; l < num_; l++ ) {
+				pointclouds_[ l ].UpdateAllPointPN( expand_ctr );
+			}
+		}
+	}
+
+	output_traj_.data_.clear();
+	for ( int i = 0; i < ( int )pose_.size(); i++ ) {
+		output_traj_.data_.push_back( FramedTransformation( i, i, i + 1, pose_[ i ] ) );
+	}
+	output_traj_.SaveToFile( pose_filename_ );
+
+	ExpandCtr( thisCtr, expand_ctr );
+	SaveCtr( expand_ctr, ctr_filename_ );
+	SavePoints( expand_ctr, sample_filename_ );
 }
 
 void COptApp::InitCtr( Eigen::VectorXd & ctr )
@@ -355,6 +712,34 @@ void COptApp::InitCtr( Eigen::VectorXd & ctr )
 	}
 }
 
+void COptApp::InitCtrSLAC( Eigen::VectorXd & ctr, Eigen::VectorXd & thisCtr )
+{
+	for ( int i = 0; i <= resolution_; i++ ) {
+		for ( int j = 0; j <= resolution_; j++ ) {
+			for ( int k = 0; k <= resolution_; k++ ) {
+				Eigen::Vector4d pos( i * unit_length_, j * unit_length_, k * unit_length_, 1 );
+				ctr( num_ * 6 + GetIndex( i, j, k ) * 3 + 0 ) = pos( 0 );
+				ctr( num_ * 6 + GetIndex( i, j, k ) * 3 + 1 ) = pos( 1 );
+				ctr( num_ * 6 + GetIndex( i, j, k ) * 3 + 2 ) = pos( 2 );
+			}
+		}
+	}
+	if ( init_ctr_file_.length() > 1 ) {
+		FILE * f = fopen( init_ctr_file_.c_str(), "r" );
+		if ( f != NULL ) {
+			char buffer[ 1024 ];
+			for ( int i = 0; i < nper_ / 3; i++ ) {
+				fgets( buffer, 1024, f );
+				sscanf( buffer, "%lf %lf %lf", &thisCtr( num_ * 6 + i * 3 ), &thisCtr( num_ * 6 + i * 3 + 1 ), &thisCtr( num_ * 6 + i * 3 + 2 ) );
+			}
+			fclose( f );
+		}
+	} else {
+		thisCtr = ctr;
+	}
+}
+
+
 void COptApp::Pose2Ctr( std::vector< Eigen::Matrix4d > & pose, Eigen::VectorXd & ctr )
 {
 	for ( int l = 0; l < num_; l++ ) {
@@ -368,6 +753,19 @@ void COptApp::Pose2Ctr( std::vector< Eigen::Matrix4d > & pose, Eigen::VectorXd &
 					ctr( l * nper_ + GetIndex( i, j, k ) * 3 + 2 ) = ppos( 2 );
 				}
 			}
+		}
+	}
+}
+
+void COptApp::ExpandCtr( const Eigen::VectorXd & ctr, Eigen::VectorXd & expand_ctr )
+{
+	expand_ctr.setZero();
+	for ( int l = 0; l < num_; l++ ) {
+		for ( int i = 0; i < nper_ / 3; i++ ) {
+			Eigen::Vector4d pos = pose_[ l ] * Eigen::Vector4d( ctr( num_ * 6 + i * 3 + 0 ), ctr( num_ * 6 + i * 3 + 1 ), ctr( num_ * 6 + i * 3 + 2 ), 1 );
+			expand_ctr( l * nper_ + i * 3 + 0 ) = pos( 0 );
+			expand_ctr( l * nper_ + i * 3 + 1 ) = pos( 1 );
+			expand_ctr( l * nper_ + i * 3 + 2 ) = pos( 2 );
 		}
 	}
 }
@@ -417,13 +815,54 @@ void COptApp::InitBaseAA( SparseMatrix & baseAA )
 		}
 	}
 
-	/*
-	for ( int i = 0; i < 100; i++ ) {
-		cout << tri[ i ].m_row << ", " << tri[ i ].m_col << ": " << tri[ i ].m_value << endl;
-	}
-	*/
-
 	baseAA.setFromTriplets( tri.begin(), tri.end() );
+}
+
+void COptApp::InitBaseJJ( SparseMatrix & baseJJ )
+{
+	TripletVector tri;
+
+	HashSparseMatrix mat( 6 * num_, 6 * num_ );
+	for ( int i = 0; i <= resolution_; i++ ) {
+		for ( int j = 0; j <= resolution_; j++ ) {
+			for ( int k = 0; k <= resolution_; k++ ) {
+				int idx[ 2 ] = { GetIndex( i, j, k ) * 3, 0 };
+				double val[ 2 ] = { 1, -1 };
+				if ( i > 0 ) {
+					idx[ 1 ] = GetIndex( i - 1, j, k ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+				if ( i < resolution_ ) {
+					idx[ 1 ] = GetIndex( i + 1, j, k ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+				if ( j > 0 ) {
+					idx[ 1 ] = GetIndex( i, j - 1, k ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+				if ( j < resolution_ ) {
+					idx[ 1 ] = GetIndex( i, j + 1, k ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+				if ( k > 0 ) {
+					idx[ 1 ] = GetIndex( i, j, k - 1 ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+				if ( k < resolution_ ) {
+					idx[ 1 ] = GetIndex( i, j, k + 1 ) * 3;
+					mat.AddHessian2( idx, val, tri );
+				}
+			}
+		}
+	}
+
+	int base_anchor = GetIndex( resolution_ / 2, resolution_ / 2, 0 ) * 3;
+
+	mat.Add( base_anchor + 0, base_anchor + 0, 1, tri );
+	mat.Add( base_anchor + 1, base_anchor + 1, 1, tri );
+	mat.Add( base_anchor + 2, base_anchor + 2, 1, tri );
+
+	baseJJ.setFromTriplets( tri.begin(), tri.end() );
 }
 
 Eigen::Matrix3d COptApp::GetRotation( const int idx, const std::vector< int > & idxx, const Eigen::VectorXd & ictr, const Eigen::VectorXd & ctr )

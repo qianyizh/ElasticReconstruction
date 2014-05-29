@@ -50,7 +50,7 @@ We strongly recommend you install Point Cloud Library (PCL) x64 for Windows.
 http://pointclouds.org/
 
 Although the main module (FragmentOptimizer) can be de-PCL-ed easily, it would
-save you a LOT of trouble if you have experiences with PCL. Other modules are 
+save you a lot of trouble if you have experiences with PCL. Other modules are 
 all heavily relying on PCL.
 
 FragmentOptimizer uses SuiteSparse and a different version of Eigen. They both

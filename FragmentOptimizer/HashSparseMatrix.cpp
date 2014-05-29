@@ -13,6 +13,18 @@ HashSparseMatrix::~HashSparseMatrix(void)
 {
 }
 
+void HashSparseMatrix::AddJb( int i, double value, double b, Eigen::VectorXd & Jb )
+{
+	Jb( i ) += value * b;
+}
+
+void HashSparseMatrix::AddJb( int idx[], double val[], int n, double b, Eigen::VectorXd & Jb )
+{
+	for ( int i = 0; i < n; i++ ) {
+		AddJb( idx[ i ], val[ i ], b, Jb );
+	}
+}
+
 void HashSparseMatrix::Add( int i, int j, double value, TripletVector & data )
 {
 	int key = i + j * 65536;

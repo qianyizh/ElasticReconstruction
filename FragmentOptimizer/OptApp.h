@@ -59,6 +59,7 @@ public:
 	std::string ctr_filename_;
 	std::string sample_filename_;
 	std::string init_ctr_file_;
+	std::string pose_filename_;
 	int sample_num_;
 	int blacklist_pair_num_;
 
@@ -80,8 +81,14 @@ public:
 	std::vector< int > absolute2relative_map_;
 	std::vector< int > relative2absolute_map_;
 
+	// rigid
+	std::vector< Eigen::Matrix4d > pose_;
+	RGBDTrajectory output_traj_;
+
+	// slac
+	std::vector< Eigen::Matrix3d > pose_rot_t_;
+
 public:
-	void Init();
 	void Blacklist( std::string filename );
 	void IPoseFromFile( std::string filename ) {
 		RGBDTrajectory ip;
@@ -93,7 +100,9 @@ public:
 	}
 
 public:
-	void Optimize();
+	void OptimizeNonrigid();
+	void OptimizeRigid();
+	void OptimizeSLAC();
 
 private:
 	void InitMap();
@@ -101,13 +110,17 @@ private:
 	void InitPointClouds();
 	void InitCorrespondences();
 	void InitCtr( Eigen::VectorXd & ctr );
+	void InitCtrSLAC( Eigen::VectorXd & ctr, Eigen::VectorXd & thisCtr );
+
 	void Pose2Ctr( std::vector< Eigen::Matrix4d > & pose, Eigen::VectorXd & ctr );
 	void InitBaseAA( SparseMatrix & baseAA );
+	void InitBaseJJ( SparseMatrix & baseJJ );
 	void SaveCtr( const Eigen::VectorXd & ctr, std::string filename );
 	void SavePoints( const Eigen::VectorXd & ctr, std::string filename );
 	inline int GetIndex( int i, int j, int k ) {
 		return i + j * ( resolution_ + 1 ) + k * ( resolution_ + 1 ) * ( resolution_ + 1 );
 	}
 	Eigen::Matrix3d GetRotation( const int idx, const std::vector< int > & idxx, const Eigen::VectorXd & ictr, const Eigen::VectorXd & ctr );
+	void ExpandCtr( const Eigen::VectorXd & ctr, Eigen::VectorXd & expand_ctr );
 };
 
