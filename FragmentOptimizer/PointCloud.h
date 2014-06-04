@@ -30,7 +30,8 @@ public:
 	std::vector< Point > points_;
 
 public:
-	void LoadFromFile( const char * filename );
+	void LoadFromPCDFile( const char * filename );
+	void LoadFromXYZNFile( const char * filename );
 
 public:
 	void UpdateAllNormal( const Eigen::VectorXd & ctr ) {

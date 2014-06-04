@@ -4,6 +4,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/time.h>
+#include <boost/filesystem.hpp>
 
 COptApp::COptApp(void)
 	: resolution_( 8 )
@@ -14,7 +15,6 @@ COptApp::COptApp(void)
 	, max_iteration_( 5 )
 	, max_inner_iteration_( 10 )
 	, max_pcg_iteration_( 100 )
-	, conv_score_( 0.01 )
 	, ctr_filename_( "output.ctr" )
 	, sample_filename_( "sample.pcd" )
 	, pose_filename_( "pose.log" )
@@ -82,16 +82,16 @@ void COptApp::InitPointClouds()
 		int ii = relative2absolute_map_[ i ];
 		char filename[ 1024 ];
 		memset( filename, 0, 1024 );
-		sprintf( filename, "%scloud_bin_xyzn_%d.xyzn", dir_prefix_.c_str(), ii );
-		pointclouds_[ i ].LoadFromFile( filename );
-	}
-	if ( sample_num_ > 0 ) {
-		int sum_to_report = 0;
-		cout << "Sample number sections" << endl;
-		for ( int i = 0; i < num_; i++ ) {
-			int this_num = pointclouds_[ i ].points_.size() / sample_num_;
-			cout << "Point cloud #" << i << ": " << sum_to_report << " - " << sum_to_report + this_num << endl;
-			sum_to_report += this_num;
+		sprintf( filename, "%scloud_bin_xyzn_%d.pcd", dir_prefix_.c_str(), ii );
+		if ( boost::filesystem::exists( std::string( filename ) ) ) {
+			pointclouds_[ i ].LoadFromPCDFile( filename );
+		} else {
+			sprintf( filename, "%scloud_bin_xyzn_%d.xyzn", dir_prefix_.c_str(), ii );
+			if ( boost::filesystem::exists( std::string( filename ) ) ) {
+				pointclouds_[ i ].LoadFromXYZNFile( filename );
+			} else {
+				PCL_ERROR( "File not found ... Check dir and num parameters.\n" );
+			}
 		}
 	}
 }
@@ -112,7 +112,6 @@ void COptApp::InitCorrespondences()
 			corres_.back().trans_ = reg_traj_.data_[ i ].transformation_;
 			corres_.back().LoadFromFile( filename );
 			PCL_INFO( "Read %s, get %d correspondences.\n", filename, corres_.back().corres_.size() );
-			//cout << filename << " - " << reg_traj_.data_[ i ].frame_ << " : " << corres_.back().corres_.size() << endl;
 		}
 	}
 }

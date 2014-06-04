@@ -68,9 +68,8 @@ public:
 	int nper_;
 	std::vector< Eigen::Matrix4d > ipose_;
 	int matrix_size_;
-	double conv_score_;
 	
-	// global point cloud, let's trust the memory...
+	// global point cloud, let's trust the memory size ...
 	std::vector< PointCloud > pointclouds_;
 
 	// global correspondences
