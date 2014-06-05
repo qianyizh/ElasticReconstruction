@@ -1,21 +1,46 @@
+Code under maintenance, please do NOT download it yet.
+
+===============================================================================
 ElasticReconstruction: dense scene reconstruction with elastic fragments.
 
-==============================================================================
+===============================================================================
 Introduction
 
-This is an open source C++ implementation based on the technique presented in:
+This is an open source C++ implementation based on the technique presented in
+the following papers:
+
+Dense Scene Reconstruction with Points of Interest, SIGGRAPH 2013
+Qian-Yi Zhou and Vladlen Koltun
 
 Elastic Fragments for Dense Scene Reconstruction, ICCV 2013
 Qian-Yi Zhou, Stephen Miller and Vladlen Koltun
-Project page: http://www.stanford.edu/~qianyizh/research.html
 
-The code is implemented and maintained by Qian-Yi Zhou (qianyizh@stanford.edu)
-You can use the code freely for research purposes. Please cite the paper if
-you use this code package.
-This code package is released WITHOUT ANY WARRANTY. Please contact us if you
-want to use this code package for any other purposes.
+Project page:
+http://www.stanford.edu/~qianyizh/projects/elasticreconstruction.html
+http://www.stanford.edu/~qianyizh/projects/scene.html
+Data page:
+http://www.stanford.edu/~qianyizh/projects/scenedata.html
 
-==============================================================================
+This github repository is maintained by Qian-Yi Zhou (Qianyi.Zhou@gmail.com)
+Contact me or Vladlen Koltun (vkoltun@gmail.com) if you have any questions.
+
+===============================================================================
+License
+
+The source code is released under GPL license.
+
+We encourage you to use the code freely for research purposes.
+Please cite our ICCV 2013 paper "Elastic Fragments for Dense Scene
+Reconstruction" if you use our code or data.
+
+For other purposes, please contact us.
+Stanford OTL is our interface for commercial use of the code, details refer to
+http://techfinder.stanford.edu/technology_detail.php?ID=30418
+
+The data on our data page can be used for any purposes with proper attribution.
+I scanned the scenes and reconstructed them. Just use them if you like.
+
+===============================================================================
 Modules
 
 + FragmentOptimizer
@@ -43,7 +68,7 @@ input, and outputs a deformed RGB-D stream.
 
 + Integrate
 
-==============================================================================
+===============================================================================
 Dependencies
 
 We strongly recommend you install Point Cloud Library (PCL) x64 for Windows.
@@ -56,14 +81,14 @@ all heavily relying on PCL.
 FragmentOptimizer uses SuiteSparse and a different version of Eigen. They both
 are included in the "external" directory under the project.
 
-==============================================================================
+===============================================================================
 Quick Start
 
 Download the data package from:
 
 Then
 
-==============================================================================
+===============================================================================
 Compilation
 
 We include project files for MSVS2010.

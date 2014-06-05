@@ -269,14 +269,6 @@ void COptApp::OptimizeNonrigid()
 				sprintf( filename, "itr%d_inner%d_out.ctr", itr, m );
 				SaveCtr( ctr, filename );
 			}
-
-			if ( score < conv_score_ ) {
-				break;
-			}
-		}
-
-		if ( score < conv_score_ ) {
-			break;
 		}
 	}
 
