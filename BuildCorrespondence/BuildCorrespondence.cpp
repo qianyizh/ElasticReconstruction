@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
 {
 	using namespace pcl::console;
 
-	if ( find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
+	if ( argc == 1 ||  find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
 		return print_help ();
 	}
 

@@ -24,18 +24,20 @@ void PointCloud::LoadFromPCDFile( const char * filename )
 		PCL_ERROR( "Error loading file.\n" );
 		return;
 	}
-	points_.resize( rawpcd->points.size() );
 	float x[ 6 ];
-	for ( int i = 0; i < ( int )points_.size(); i++ ) {
-		x[ 0 ] = rawpcd->points[ i ].x;
-		x[ 1 ] = rawpcd->points[ i ].y;
-		x[ 2 ] = rawpcd->points[ i ].z;
-		x[ 3 ] = rawpcd->points[ i ].normal_x;
-		x[ 4 ] = rawpcd->points[ i ].normal_y;
-		x[ 5 ] = rawpcd->points[ i ].normal_z;
-		if ( GetCoordinate( x, points_[ i ] ) == false ) {
-			PCL_ERROR( "Error!! Point out of bound!!\n" );
-			return;
+	for ( int i = 0; i < ( int )rawpcd->points.size(); i++ ) {
+		if ( !_isnan( rawpcd->points[ i ].normal_x ) ) {
+			points_.resize( points_.size() + 1 );
+			x[ 0 ] = rawpcd->points[ i ].x;
+			x[ 1 ] = rawpcd->points[ i ].y;
+			x[ 2 ] = rawpcd->points[ i ].z;
+			x[ 3 ] = rawpcd->points[ i ].normal_x;
+			x[ 4 ] = rawpcd->points[ i ].normal_y;
+			x[ 5 ] = rawpcd->points[ i ].normal_z;
+			if ( GetCoordinate( x, points_.back() ) == false ) {
+				PCL_ERROR( "Error!! Point out of bound!!\n" );
+				return;
+			}
 		}
 	}
 	printf( "Read %s ... get %d points.\n", filename, points_.size() );

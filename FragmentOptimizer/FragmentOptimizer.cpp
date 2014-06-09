@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
 	parse_argument( argc, argv, "--verbose", verbosity_level );
 	setVerbosityLevel( (VERBOSITY_LEVEL)verbosity_level );
 
-	if ( find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
+	if (  argc == 1 || find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
 		return print_help ();
 	}
 

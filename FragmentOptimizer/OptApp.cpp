@@ -62,6 +62,8 @@ void COptApp::InitIPose()
 
 	Eigen::Matrix4d leftbase = basepose * rgbd_traj_.data_[ 0 ].transformation_.inverse();
 	ipose_.resize( num_ );
+	pose_.resize( num_ );
+	pose_rot_t_.resize( num_ );
 
 	for ( int i = 0; i < num_; i++ ) {
 		int ii = relative2absolute_map_[ i ];
@@ -82,7 +84,7 @@ void COptApp::InitPointClouds()
 		int ii = relative2absolute_map_[ i ];
 		char filename[ 1024 ];
 		memset( filename, 0, 1024 );
-		sprintf( filename, "%scloud_bin_xyzn_%d.pcd", dir_prefix_.c_str(), ii );
+		sprintf( filename, "%scloud_bin_%d.pcd", dir_prefix_.c_str(), ii );
 		if ( boost::filesystem::exists( std::string( filename ) ) ) {
 			pointclouds_[ i ].LoadFromPCDFile( filename );
 		} else {
