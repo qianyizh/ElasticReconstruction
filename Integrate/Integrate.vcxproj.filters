@@ -27,6 +27,9 @@
     <ClInclude Include="TSDFVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TSDFVolumeUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TSDFVolume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TSDFVolumeUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
