@@ -106,6 +106,6 @@ public:
 	float * weight_;
 
 private:
-	int resolution_;
+	const int resolution_;
 };
 

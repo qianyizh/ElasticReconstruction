@@ -30,6 +30,9 @@
     <ClInclude Include="TSDFVolumeUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IntegrateApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TSDFVolumeUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegrateApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

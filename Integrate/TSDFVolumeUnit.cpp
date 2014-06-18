@@ -2,8 +2,8 @@
 #include "TSDFVolumeUnit.h"
 
 TSDFVolumeUnit::TSDFVolumeUnit(void)
+	: resolution_( 64 )
 {
-	resolution_ = 128;
 	int vol_size = resolution_ * resolution_ * resolution_;
 
 	sdf_ = new float[ vol_size ];
