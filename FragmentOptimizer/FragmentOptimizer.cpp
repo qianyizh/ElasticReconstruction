@@ -19,12 +19,9 @@ int print_help ()
 	cout << "    --weight <weight>               : 1.0 for nonrigid, 10000.0 for rigid" << endl;
 	cout << "    --resolution <resolution>       : default - 8" << endl;
 	cout << "    --length <length>               : default - 3.0" << endl;
-	cout << "    --global_length <length>        : default - 3.0" << endl;
 	cout << "    --interval <interval>           : default - 50" << endl;
 	cout << "    --iteration <max_number>        : default - 5" << endl;
 	cout << "    --inner_iteration <max_number>  : default - 10" << endl;
-	cout << "    --pcg_iteration <max_number>    : default - 100" << endl;
-	cout << "    --init_ctr <ctr_file>           : init control grid from a file" << endl;
 	cout << "    --save_to <ctr_file>            : default - output.ctr" << endl;
 	cout << "    --write_xyzn_sample <sample_num>: per <sample_num> write a point" << endl;
 	cout << "    --blasklist <blacklist_file>    : each line is the block we want to blacklist" << endl;
@@ -47,7 +44,7 @@ int main(int argc, char * argv[])
 	parse_argument( argc, argv, "--verbose", verbosity_level );
 	setVerbosityLevel( (VERBOSITY_LEVEL)verbosity_level );
 
-	if (  argc == 1 || find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
+	if ( argc == 1 || find_switch( argc, argv, "--help" ) || find_switch( argc, argv, "-h" ) ) {
 		return print_help ();
 	}
 
@@ -70,7 +67,6 @@ int main(int argc, char * argv[])
 	parse_argument( argc, argv, "--interval", app.interval_ );
 	parse_argument( argc, argv, "--iteration", app.max_iteration_ );
 	parse_argument( argc, argv, "--inner_iteration", app.max_inner_iteration_ );
-	parse_argument( argc, argv, "--pcg_iteration", app.max_pcg_iteration_ );
 	parse_argument( argc, argv, "--save_to", app.ctr_filename_ );
 	parse_argument( argc, argv, "--write_xyzn_sample", app.sample_num_ );
 	parse_argument( argc, argv, "--blacklistpair", app.blacklist_pair_num_ );	

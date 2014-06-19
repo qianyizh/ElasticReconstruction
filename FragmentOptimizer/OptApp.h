@@ -52,7 +52,6 @@ public:
 	double length_;
 	int max_iteration_;
 	int max_inner_iteration_;
-	int max_pcg_iteration_;
 	std::string dir_prefix_;
 	std::string rgbd_filename_;
 	std::string reg_filename_;

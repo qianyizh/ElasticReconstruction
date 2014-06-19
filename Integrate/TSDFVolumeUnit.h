@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <fstream>
-#include <Eigen/Core>
+#include <Eigen/Dense>
 #include <boost/filesystem.hpp>
 #include <pcl/io/grabber.h>
 #include <pcl/io/openni_grabber.h>
@@ -64,28 +64,28 @@ struct RGBDTrajectory {
 
 struct CameraParam {
 public:
-	double fx_, fy_, cx_, cy_, ICP_trunc_, integration_trunc_;
+	float fx_, fy_, cx_, cy_, ICP_trunc_, integration_trunc_;
 
-	CameraParam() : fx_( 525.0 ), fy_( 525.0 ), cx_( 319.5 ), cy_( 239.5 ), ICP_trunc_( 2.5 ), integration_trunc_( 2.5 )  {
+	CameraParam() : fx_( 525.0f ), fy_( 525.0f ), cx_( 319.5f ), cy_( 239.5f ), ICP_trunc_( 2.5f ), integration_trunc_( 2.5f )  {
 	}
 
-	void loadFromFile( std::string filename ) {
+	void LoadFromFile( std::string filename ) {
 		FILE * f = fopen( filename.c_str(), "r" );
 		if ( f != NULL ) {
 			char buffer[1024];
 			while ( fgets( buffer, 1024, f ) != NULL ) {
 				if ( strlen( buffer ) > 0 && buffer[ 0 ] != '#' ) {
-					sscanf( buffer, "%lf", &fx_);
+					sscanf( buffer, "%f", &fx_);
 					fgets( buffer, 1024, f );
-					sscanf( buffer, "%lf", &fy_);
+					sscanf( buffer, "%f", &fy_);
 					fgets( buffer, 1024, f );
-					sscanf( buffer, "%lf", &cx_);
+					sscanf( buffer, "%f", &cx_);
 					fgets( buffer, 1024, f );
-					sscanf( buffer, "%lf", &cy_);
+					sscanf( buffer, "%f", &cy_);
 					fgets( buffer, 1024, f );
-					sscanf( buffer, "%lf", &ICP_trunc_);
+					sscanf( buffer, "%f", &ICP_trunc_);
 					fgets( buffer, 1024, f );
-					sscanf( buffer, "%lf", &integration_trunc_);
+					sscanf( buffer, "%f", &integration_trunc_);
 				}
 			}
 			fclose ( f );
@@ -98,14 +98,17 @@ public:
 class TSDFVolumeUnit
 {
 public:
-	TSDFVolumeUnit(void);
+	TSDFVolumeUnit( int resolution, int xi, int yi, int zi );
 	~TSDFVolumeUnit(void);
+
+public:
+	typedef boost::shared_ptr< TSDFVolumeUnit > Ptr;
 
 public:
 	float * sdf_;
 	float * weight_;
 
-private:
 	const int resolution_;
+	int xi_, yi_, zi_;
 };
 

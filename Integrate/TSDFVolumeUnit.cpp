@@ -1,8 +1,9 @@
 #include "StdAfx.h"
 #include "TSDFVolumeUnit.h"
 
-TSDFVolumeUnit::TSDFVolumeUnit(void)
-	: resolution_( 64 )
+TSDFVolumeUnit::TSDFVolumeUnit( int resolution, int xi, int yi, int zi )
+	: resolution_( resolution )
+	, xi_( xi ), yi_( yi ), zi_( zi )
 {
 	int vol_size = resolution_ * resolution_ * resolution_;
 

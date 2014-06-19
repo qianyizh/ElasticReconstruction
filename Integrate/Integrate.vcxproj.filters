@@ -33,6 +33,9 @@
     <ClInclude Include="IntegrateApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ControlGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IntegrateApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
