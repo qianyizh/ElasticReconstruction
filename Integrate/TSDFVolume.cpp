@@ -19,17 +19,17 @@ TSDFVolume::~TSDFVolume(void)
 void TSDFVolume::ScaleDepth( std::vector< unsigned short > & depth, std::vector< float > & scaled )
 {
 #pragma omp parallel for num_threads( 8 )
-	for ( int x = 0; x < rows_; x++ ) {
-		for ( int y = 0; y < cols_; y++ ) {
-			unsigned short d = depth[ x * cols_ + y ];
+	for ( int y = 0; y < rows_; y++ ) {
+		for ( int x = 0; x < cols_; x++ ) {
+			unsigned short d = depth[ y * cols_ + x ];
 			float xl = ( x - camera_.cx_ ) / camera_.fx_;
 			float yl = ( y - camera_.cy_ ) / camera_.fy_;
 			float lambda = sqrtf( xl * xl + yl * yl + 1 );
 			float res = d * lambda / 1000.f;
 			if ( res > camera_.integration_trunc_ ) {
-				scaled[ x * cols_ + y ] = 0.0f;
+				scaled[ y * cols_ + x ] = 0.0f;
 			} else {
-				scaled[ x * cols_ + y ] = d * lambda / 1000.f;
+				scaled[ y * cols_ + x ] = d * lambda / 1000.f;
 			}
 		}
 	}
@@ -46,22 +46,24 @@ void TSDFVolume::Integrate( std::vector< unsigned short > & depth, std::vector< 
 		for ( int u = 0; u < cols_; u += 1 ) {
 			unsigned short d = depth[ v * cols_ + u ];
 			if ( UVD2XYZ( u, v, d, x, y, z ) ) {
-				Eigen::Vector4d v = transformation * Eigen::Vector4d( x, y, z, 1 );
-				xi = ( ( int )floor( v( 0 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
-				yi = ( ( int )floor( v( 1 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
-				zi = ( ( int )floor( v( 2 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
+				Eigen::Vector4d vv = transformation * Eigen::Vector4d( x, y, z, 1 );
+				xi = ( ( int )floor( vv( 0 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
+				yi = ( ( int )floor( vv( 1 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
+				zi = ( ( int )floor( vv( 2 ) / unit_length_ + 0.5 ) + ( 256 * 64 ) ) / 64;
 				key = hash_key( xi, yi, zi );
 				if ( touched_unit.find( key ) == touched_unit.end() ) {
 					touched_unit.insert( key );
 					if ( data_.find( key ) == data_.end() ) {
-						data_[ key ] = TSDFVolumeUnit::Ptr( new TSDFVolumeUnit( 64 , xi, yi, zi ) );
-						//PCL_INFO( "Created a volume unit at (%d, %d, %d)\n", xi, yi, zi );
+						data_[ key ] = TSDFVolumeUnit::Ptr( new TSDFVolumeUnit( 64, xi, yi, zi ) );
 					}
 					IntegrateVolumeUnit( scaled, transformation.cast< float >(), trans_inv.cast< float >(), data_[ key ], I2F( xi ), I2F( yi ), I2F( zi ) );
 				}
 			}
 		}
 	}
+	//for ( std::unordered_map< int, TSDFVolumeUnit::Ptr >::iterator it = data_.begin(); it != data_.end(); it++ ) {
+	//	IntegrateVolumeUnit( scaled,  transformation.cast< float >(), trans_inv.cast< float >(), it->second, I2F( it->second->xi_ ), I2F( it->second->yi_ ), I2F( it->second->zi_ ) );
+	//}
 }
 
 void TSDFVolume::IntegrateVolumeUnit( std::vector< float > & scaled, const Eigen::Matrix4f & trans, const Eigen::Matrix4f & trans_inv, TSDFVolumeUnit::Ptr volume, float x_shift, float y_shift, float z_shift )
@@ -109,6 +111,7 @@ void TSDFVolume::SaveWorld( std::string filename )
 		TSDFVolumeUnit::Ptr unit = it->second;
 		float * sdf = unit->sdf_;
 		float * w = unit->weight_;
+
 		for ( int i = 0; i < unit->resolution_; i++ ) {
 			for ( int j = 0; j < unit->resolution_; j++ ) {
 				for ( int k = 0; k < unit->resolution_; k++, sdf++, w++ ) {
