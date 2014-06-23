@@ -11,12 +11,14 @@ CCorresApp::CCorresApp(void)
 	, dist_thresh_( 0.015 )
 	, normal_thresh_( 0.8660 )
 	, registration_( false )
-	, reg_dist_( 0.05 )
-	, reg_ratio_( 0.3 )
-	, reg_num_( 50000 )
+	, reg_dist_( 0.03 )
+	, reg_ratio_( 0.25 )
+	, reg_num_( 40000 )
 	, redux_( false )
 	, num_( 0 )
 	, bbox_length_( -1.0 )
+	, length_( 3.0 )
+	, interval_( 50 )
 {
 }
 
@@ -25,7 +27,7 @@ CCorresApp::~CCorresApp(void)
 {
 }
 
-void CCorresApp::LoadData( std::string filename )
+void CCorresApp::LoadData( std::string filename, int num )
 {
 	const char * c = strrchr( filename.c_str(), '\\' );
 	if ( c == NULL ) {
@@ -34,9 +36,41 @@ void CCorresApp::LoadData( std::string filename )
 	memset( m_pDirName, 0, 1024 );
 	strncat_s( m_pDirName, 1024, filename.c_str(), c - filename.c_str() + 1 );
 
-	corres_traj_.LoadFromFile( filename );
+	if ( num > 0 ) {
+		RGBDTrajectory temp;
+		temp.LoadFromFile( filename );
+		corres_traj_.data_.clear();
+		num_ = num;
 
-	num_ = corres_traj_.data_[ 0 ].frame_;
+		Eigen::Matrix4d basepose = Eigen::Matrix4d::Identity();
+		basepose( 0, 3 ) = length_ / 2.0;
+		basepose( 1, 3 ) = length_ / 2.0;
+		basepose( 2, 3 ) = - 0.3;
+
+		Eigen::Matrix4d baseinverse = basepose.inverse();
+		Eigen::Matrix4d leftbase = basepose * temp.data_[ 0 ].transformation_.inverse();
+		std::vector< Eigen::Matrix4d > ipose;
+		ipose.resize( num_ );
+
+		for ( int i = 0; i < num_; i++ ) {
+			ipose[ i ] = leftbase * temp.data_[ i * interval_ ].transformation_ * baseinverse;
+		}
+
+		for ( int i = 0; i < num_ - 1; i++ ) {
+			corres_traj_.data_.push_back( FramedTransformation( i, i + 1, num_, ipose[ i ].inverse() * ipose[ i + 1 ] ) );
+			for ( int j = i + 2; j < num; j++ ) {
+				Eigen::Matrix4d trans = ipose[ i ].inverse() * ipose[ j ];
+				if ( GetVolumeOverlapRatio( trans ) > 0.3 ) {
+					corres_traj_.data_.push_back( FramedTransformation( i, j, num_, trans ) );
+				}
+			}
+		}
+		PCL_WARN( "%d initial matching candidates are created.\n", corres_traj_.data_.size() );
+	} else {
+		corres_traj_.LoadFromFile( filename );
+		num_ = corres_traj_.data_[ 0 ].frame_;
+	}
+
 	pointclouds_.clear();
 	pointclouds_.resize( num_ );
 

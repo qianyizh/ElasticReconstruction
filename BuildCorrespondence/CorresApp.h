@@ -94,9 +94,11 @@ public:
 	RGBDTrajectory redux_traj_;
 	stdext::hash_map< int, int > redux_map_;
 	int num_;
+	int interval_;
+	double length_;
 
 public:
-	void LoadData( std::string filename );
+	void LoadData( std::string filename, int num );
 	void FindCorrespondence();
 	void Registration();
 	void Finalize();
@@ -112,5 +114,23 @@ public:
 	}
 	int GetReduxIndex( int i, int j ) {
 		return i + j * num_;
+	}
+	double GetVolumeOverlapRatio( Eigen::Matrix4d & trans ) {
+		int res = 20;
+		double ul = length_ / ( double )res;
+		int s = 0;
+		for ( int i = 0; i < res; i++ ) {
+			for ( int j = 0; j < res; j++ ) {
+				for ( int k = 0; k < res; k++ ) {
+					Eigen::Vector4d pos( ( i + 0.5 ) * ul, ( j + 0.5 ) * ul, ( k + 0.5 ) * ul, 1 );
+					Eigen::Vector4d ppos = trans * pos;
+					if ( ppos( 0 ) >= 0 && ppos( 0 ) <= length_ && ppos( 1 ) >= 0 && ppos( 1 ) <= length_ && ppos( 2 ) >= 0 && ppos( 2 ) <= length_ ) {
+						s++;
+					}
+				}
+			}
+		}
+
+		return ( double )s / res / res / res;
 	}
 };

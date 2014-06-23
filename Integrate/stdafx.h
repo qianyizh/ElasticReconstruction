@@ -13,6 +13,6 @@
 using namespace std;
 
 #define IMAGE_VIEWER
-//#undef IMAGE_VIEWER
+#undef IMAGE_VIEWER
 
 // TODO: reference additional headers your program requires here
