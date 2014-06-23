@@ -39,8 +39,8 @@ License
 
 The source code is released under MIT license.
 
-In general, you can do anything with the code for any purposes with proper 
-attribution. If you do something interesting with the data, we'll be happy to 
+In general, you can do anything with the code for any purposes, with proper 
+attribution. If you do something interesting with the code, we'll be happy to 
 know about it. Feel free to contact us: Qian-Yi Zhou (Qianyi.Zhou@gmail.com), 
 Vladlen Koltun (vkoltun@gmail.com).
 
@@ -48,7 +48,9 @@ The data on our data page can be used for any purposes with proper attribution.
 I scanned the scenes and reconstructed them. Just use them if you like.
 
 Please cite our ICCV 2013 paper "Elastic Fragments for Dense Scene
-Reconstruction" if you use our code or data.
+Reconstruction" and/or our CVPR 2014 paper "Simultaneous Localization and 
+Calibration: Self-Calibration of Consumer Depth Cameras" if you use our code 
+or data.
 
 ===============================================================================
 Modules
