@@ -22,6 +22,7 @@ int print_help ()
 	cout << "    --reg_num <number>              : correspondence point number requirement, default 40,000" << endl;
 	cout << "    --blasklist <blacklist_file>    : each line is the block we want to blacklist" << endl;
 	cout << "    --save_xyzn                     : save point cloud into ascii file" << endl;
+	cout << "    --output_information            : output the registration information matrix into reg_output.info" << endl;
 	cout << "    --redux <log_file>              : use transformations in <log_file> as constraints" << endl;
 	return 0;
 }
@@ -72,6 +73,9 @@ int main(int argc, char * argv[])
 		}
 		if ( parse_argument( argc, argv, "--redux", redux_file ) > 0 ) {
 			app.Redux( redux_file );
+		}
+		if ( find_switch( argc, argv, "--output_information" ) ) {
+			app.output_information_ = true;
 		}
 		if ( find_switch( argc, argv, "--registration" ) ) {
 			pcl::ScopeTime ttime( "Neat Registration" );

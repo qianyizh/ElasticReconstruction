@@ -11,6 +11,7 @@ CCorresApp::CCorresApp(void)
 	, dist_thresh_( 0.015 )
 	, normal_thresh_( 0.8660 )
 	, registration_( false )
+	, output_information_( false )
 	, reg_dist_( 0.03 )
 	, reg_ratio_( 0.25 )
 	, reg_num_( 40000 )
@@ -110,6 +111,13 @@ void CCorresApp::LoadData( std::string filename, int num )
 
 void CCorresApp::FindCorrespondence()
 {
+	if ( output_information_ ) {
+		corres_info_.data_.clear();
+		for ( int i = 0; i < ( int )corres_traj_.data_.size(); i++ ) {
+			corres_info_.data_.push_back( FramedInformation( corres_traj_.data_[ i ].id1_, corres_traj_.data_[ i ].id2_, corres_traj_.data_[ i ].frame_, InformationMatrix::Zero() ) );
+		}
+	}
+
 	#pragma omp parallel for num_threads( 8 ) schedule( dynamic )
 	for ( int i = 0; i < ( int )corres_traj_.data_.size(); i++ ) {
 		if ( blacklist_.find( corres_traj_.data_[ i ].id1_ ) != blacklist_.end() || blacklist_.find( corres_traj_.data_[ i ].id2_ ) != blacklist_.end() ) {
@@ -173,6 +181,30 @@ void CCorresApp::FindCorrespondence()
 				fprintf( f, "%d %d\n", corres[ k ].first, corres[ k ].second );
 			}
 			fclose( f );
+		}
+
+		if ( output_information_ ) {
+			corres_info_.data_[ i ].frame_ = corres_traj_.data_[ i ].frame_;
+
+			InformationMatrix & ATA = corres_info_.data_[ i ].information_;
+			ATA.setZero ();
+
+			for ( int k = 0; k < ( int )corres.size(); k++ ) {
+				pcl::PointXYZRGBNormal * source_it = &( pcd1->points[ corres[ k ].second ] );
+				const float & sx = source_it->x;
+				const float & sy = source_it->y;
+				const float & sz = source_it->z;
+
+				Eigen::Matrix< double, 3, 6 > A;
+				A << 0, 2 * sz, - 2 * sy, 1, 0, 0,
+					- 2 * sz, 0, 2 * sx, 0, 1, 0,
+					2 * sy, - 2 * sx, 0, 0, 0, 1;
+
+				ATA += A.transpose() * A;
+			}
+
+			//cout << ATA << endl << endl;
+			corres_info_.data_[ i ].information_ = ATA;
 		}
 	}
 }
@@ -289,6 +321,10 @@ void CCorresApp::Registration()
 void CCorresApp::Finalize()
 {
 	corres_traj_.SaveToFile( "reg_output.log" );
+
+	if ( output_information_ ) {
+		corres_info_.SaveToFile( "reg_output.info" );
+	}
 }
 
 void CCorresApp::Blacklist( std::string filename )
