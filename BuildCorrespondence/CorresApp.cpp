@@ -196,9 +196,9 @@ void CCorresApp::FindCorrespondence()
 				const float & sz = source_it->z;
 
 				Eigen::Matrix< double, 3, 6 > A;
-				A << 0, 2 * sz, - 2 * sy, 1, 0, 0,
-					- 2 * sz, 0, 2 * sx, 0, 1, 0,
-					2 * sy, - 2 * sx, 0, 0, 0, 1;
+				A << 1, 0, 0, 0, 2 * sz, - 2 * sy,
+					0, 1, 0, - 2 * sz, 0, 2 * sx,
+					0, 0, 1, 2 * sy, - 2 * sx, 0;
 
 				ATA += A.transpose() * A;
 			}
