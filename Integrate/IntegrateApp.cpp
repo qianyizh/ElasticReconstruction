@@ -191,6 +191,10 @@ void CIntegrateApp::Execute( bool has_data )
 		return;
 	}
 
+	if ( traj_.data_[ frame_id_ - 1 ].frame_ == -1 ) {
+		return;
+	}
+
 	if ( frame_id_ >= traj_.data_.size() ) {
 		exit_ = true;
 		return;
