@@ -23,6 +23,8 @@ int print_help ()
 	cout << "    --interval <interval>           : default - 50" << endl;
 	cout << "    --camera <param_file>           : load camera parameters" << endl;
 	cout << "    --save_to <pcd_file>            : output file, default - world.pcd" << endl;
+	cout << "    --start_from <frame_id>         : frames before frame_id will be skipped" << endl;
+	cout << "    --end_at <frame_id>             : frames after frame_id will be skipped" << endl;
 	cout << "Valid depth data sources:" << endl; 
 	cout << "    -dev <device> (default), -oni <oni_file>" << endl;
 	return 0;
@@ -64,6 +66,8 @@ int main(int argc, char * argv[])
 	parse_argument( argc, argv, "--seg_traj", app.seg_filename_ );
 	parse_argument( argc, argv, "--camera", app.camera_filename_ );
 	parse_argument( argc, argv, "--save_to", app.pcd_filename_ );
+	parse_argument( argc, argv, "--start_from", app.start_from_ );
+	parse_argument( argc, argv, "--end_at", app.end_at_ );
 
 	parse_argument( argc, argv, "--ctr", app.ctr_filename_ );	
 	parse_argument( argc, argv, "--num", app.ctr_num_ );	

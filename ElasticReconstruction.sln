@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BuildCorrespondence", "Buil
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Integrate", "Integrate\Integrate.vcxproj", "{D124E756-F067-43D3-85D8-61AC417C54FA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphOptimizer", "GraphOptimizer\GraphOptimizer.vcxproj", "{F81F1BD4-206E-41A0-BF48-E837246BBD0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,13 @@ Global
 		{D124E756-F067-43D3-85D8-61AC417C54FA}.Release|Win32.Build.0 = Release|Win32
 		{D124E756-F067-43D3-85D8-61AC417C54FA}.Release|x64.ActiveCfg = Release|x64
 		{D124E756-F067-43D3-85D8-61AC417C54FA}.Release|x64.Build.0 = Release|x64
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Debug|Win32.Build.0 = Debug|Win32
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Debug|x64.ActiveCfg = Debug|Win32
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|Win32.ActiveCfg = Release|Win32
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|Win32.Build.0 = Release|Win32
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|x64.ActiveCfg = Release|x64
+		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

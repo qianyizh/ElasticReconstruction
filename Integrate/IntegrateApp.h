@@ -66,6 +66,8 @@ public:
 	int ctr_interval_;
 	int ctr_num_;
 	double ctr_length_;
+	int start_from_;
+	int end_at_;
 
 private:
 	std::vector< unsigned short > depth_buffer_;

@@ -21,6 +21,8 @@ CIntegrateApp::CIntegrateApp( pcl::Grabber & source, bool use_device )
 	, ctr_resolution_( 8 )
 	, ctr_interval_( 50 )
 	, ctr_length_( 3.0 )
+	, start_from_( -1 )
+	, end_at_( 100000000 )
 {
 	registration_ = capture_.providesCallback< pcl::ONIGrabber::sig_cb_openni_image_depth_image > ();
 	cout << "Registration mode: " << ( registration_ ? "On" : "Off (not supported by source)" ) << endl;
@@ -202,6 +204,14 @@ void CIntegrateApp::Execute( bool has_data )
 
 	if ( frame_id_ % 100 == 0 ) {
 		PCL_WARN( "Frames processed : %d / %d\n", frame_id_, traj_.data_.size() );
+	}
+
+	if ( frame_id_ < start_from_ || frame_id_ > end_at_ ) {
+		if ( frame_id_ > end_at_ ) {
+			PCL_WARN( "Reaching the specified end point.\n" );
+			exit_ = true;
+		}
+		return;
 	}
 
 	if ( ctr_num_ > 0 ) {
