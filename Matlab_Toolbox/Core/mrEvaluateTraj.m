@@ -1,7 +1,6 @@
 function [ rmse, trans ] = mrEvaluateTraj( traj_et, traj_gt )
     gt_n = size( traj_gt, 2 );
     et_n = size( traj_et, 2 );
-
     if (gt_n ~= et_n)
         fprintf('WARNING: There are Lost Frames!\n');
         fprintf('ground truth traj : %d frames\n', gt_n);
@@ -9,11 +8,26 @@ function [ rmse, trans ] = mrEvaluateTraj( traj_et, traj_gt )
         gt_n = min( [ gt_n, et_n ] );
         et_n = gt_n;
     end
+    n = et_n;
 
+    trans = mrAlignTraj( traj_et, traj_gt );
+    err = zeros( 1, n );
+    
+    for i = 1 : n
+        assert( traj_et( i ).info( 3 ) == traj_gt( i ).info( 3 ),...
+            'bad trajectory file format or asynchronized frame.' );
+        trans_et = trans * traj_et( i ).trans;
+        trans_gt = traj_gt( i ).trans;
+        err( i ) = norm( trans_gt( 1 : 3, 4 ) - trans_et( 1 : 3, 4 ) );
+    end
+    
+    rmse = sqrt( err * err' / size( err, 2 ) );
+    fprintf( 'median absolute translational error %f m\n', median( err ) );
+    fprintf( 'rmse %f m\n', rmse );
 end
 
 function [ trans ] = mrAlignTraj( traj_et, traj_gt )
-    n = size( traj, 2 );
+    n = size( traj_et, 2 );
     gt_trans = zeros( 3, n );
     et_trans = zeros( 3, n );
 
