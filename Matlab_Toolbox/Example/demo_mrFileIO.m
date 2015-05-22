@@ -10,14 +10,14 @@ delete( 'Data/temp.log' );
 figure(4328);
 clf;
 hold on;
-mrDrawTraj( traj_gt, 'k-' );
-mrDrawTraj( traj_rigid, 'r-' );
+mrDrawTrajectory( traj_gt, 'k-' );
+mrDrawTrajectory( traj_rigid, 'r-' );
 hold off;
 legend( 'Ground truth trajectory', 'Estimated trajectory', ...
     'Location', 'northwest' );
 
-reg_log_gt = mrLoadLog( 'Data/RegistrationEvaluation/registration_gt.log' );
-reg_info_gt = mrLoadInfo( 'Data/RegistrationEvaluation/registration_gt.info' );
+reg_log_gt = mrLoadLog( 'Data/RegistrationEvaluation/synth1/gt.log' );
+reg_info_gt = mrLoadInfo( 'Data/RegistrationEvaluation/synth1/gt.info' );
 mrWriteInfo( reg_info_gt, 'Data/temp.info' );
 reg_info_gt = mrLoadInfo( 'Data/temp.info' );
 delete( 'Data/temp.info' );

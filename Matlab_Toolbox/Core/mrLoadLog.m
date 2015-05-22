@@ -9,6 +9,5 @@ function [ traj ] = mrLoadLog( filename )
         x = fscanf( fid, '%d', [1 3] );
     end
     fclose( fid );
-    
-    disp( [ num2str( size( traj, 2 ) ), ' frames have been read.' ] );
+    %disp( [ num2str( size( traj, 2 ) ), ' frames have been read.' ] );
 end

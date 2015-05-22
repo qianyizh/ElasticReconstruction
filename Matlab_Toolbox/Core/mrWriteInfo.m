@@ -4,8 +4,7 @@ function mrWriteInfo( info, filename )
         mrWriteInfoStruct( fid, info( i ).info, info( i ).mat );
     end
     fclose( fid );
-
-    disp( [ num2str( size( info, 2 ) ), ' matrices have been written.' ] );
+    %disp( [ num2str( size( info, 2 ) ), ' matrices have been written.' ] );
 end
 
 function mrWriteInfoStruct( fid, x, m )

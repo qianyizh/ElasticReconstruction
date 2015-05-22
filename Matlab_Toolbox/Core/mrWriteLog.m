@@ -4,8 +4,7 @@ function mrWriteLog( traj, filename )
         mrWriteLogStruct( fid, traj( i ).info, traj( i ).trans );
     end
     fclose( fid );
-
-    disp( [ num2str( size( traj, 2 ) ), ' frames have been written.' ] );
+    %disp( [ num2str( size( traj, 2 ) ), ' frames have been written.' ] );
 end
 
 function mrWriteLogStruct( fid, x, m )

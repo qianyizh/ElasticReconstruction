@@ -9,6 +9,5 @@ function [ info ] = mrLoadInfo( filename )
         x = fscanf( fid, '%d', [ 1, 3 ] );
     end
     fclose( fid );
-    
-    disp( [ num2str( size( info, 2 ) ), ' matrices have been read.' ] );
+    %disp( [ num2str( size( info, 2 ) ), ' matrices have been read.' ] );
 end
