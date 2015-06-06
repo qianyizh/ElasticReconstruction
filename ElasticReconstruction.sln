@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Integrate", "Integrate\Inte
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphOptimizer", "GraphOptimizer\GraphOptimizer.vcxproj", "{F81F1BD4-206E-41A0-BF48-E837246BBD0B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlobalRegistration", "GlobalRegistration\GlobalRegistration.vcxproj", "{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,6 +54,13 @@ Global
 		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|Win32.Build.0 = Release|Win32
 		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|x64.ActiveCfg = Release|x64
 		{F81F1BD4-206E-41A0-BF48-E837246BBD0B}.Release|x64.Build.0 = Release|x64
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Debug|Win32.Build.0 = Debug|Win32
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Debug|x64.ActiveCfg = Debug|Win32
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Release|Win32.ActiveCfg = Release|Win32
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Release|Win32.Build.0 = Release|Win32
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Release|x64.ActiveCfg = Release|x64
+		{179521BB-2F32-4DD8-8FFE-2F6CEDC7A0CE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
