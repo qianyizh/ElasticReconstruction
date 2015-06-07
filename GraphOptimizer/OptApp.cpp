@@ -144,6 +144,18 @@ void COptApp::OptimizeSwitchable()
 		}
 	}
 	loop_remain_traj_.SaveToFile( loop_remain_log_file_ );
+
+	refine_traj_.data_.clear();
+	for ( int i = 0; i < ( int )odometry_traj_.data_.size(); i++ ) {
+		refine_traj_.data_.push_back( odometry_traj_.data_[ i ] );
+	}
+	for ( int i = 0; i < ( int )switch_edge.size(); i++ ) {
+		SwitchableEdge & edge = switch_edge[ i ];
+		if ( edge.v_->estimate() > 0.5 && loop_traj_.data_[ i ].id1_ + 1 < loop_traj_.data_[ i ].id2_ ) {
+			refine_traj_.data_.push_back( loop_traj_.data_[ i ] );
+		}
+	}
+	refine_traj_.SaveToFile( refine_log_file_ );
 }
 
 void COptApp::OptimizeEM()

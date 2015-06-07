@@ -32,9 +32,6 @@ int main(int argc, char * argv[])
 	int max_iteration_;
 	
 	// output
-	std::string pose_log_file_;
-	std::string loop_remain_log_file_;
-
 	po::options_description io_option( "Input/Output Options (configured automatically if not otherwise specified)" );
 	io_option.add_options()
 		( "odometry", po::value< string >( &app.odometry_log_file_ )->default_value( "odometry.log" ), "odometry transformations" )
@@ -43,6 +40,7 @@ int main(int argc, char * argv[])
 		( "loopinfo", po::value< string >( &app.loop_info_file_ )->default_value( "loop.info" ), "loop closure information matrices, optional" )
 		( "pose", po::value< string >( &app.pose_log_file_ )->default_value( "opt_output.log" ), "output poses of fragments" )
 		( "keep", po::value< string >( &app.loop_remain_log_file_ )->default_value( "loop_remain.log" ), "output pruned loop closure transformations" )
+		( "refine", po::value< string >( &app.refine_log_file_ )->default_value( "refine.log" ), "loop closure and odometry edges that need to be refined" )
 		;
 
 	po::options_description arg_option;

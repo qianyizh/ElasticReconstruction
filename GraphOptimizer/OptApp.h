@@ -17,6 +17,7 @@ public:
 	
 	RGBDTrajectory pose_traj_;
 	RGBDTrajectory loop_remain_traj_;
+	RGBDTrajectory refine_traj_;
 
 	// input
 	std::string odometry_log_file_;
@@ -30,6 +31,7 @@ public:
 	// output
 	std::string pose_log_file_;
 	std::string loop_remain_log_file_;
+	std::string refine_log_file_;
 
 public:
 	bool Init();
