@@ -71,14 +71,14 @@ nonrigid correction pattern. See CVPR 2014 and ICCV 2013 papers for details.
 ICP refinement for point cloud pairs registered by GlobalRegistration module.
 
 + Integrate
-An CPU-based algorithm that integrates depth images into a voxel, based on
+A CPU-based algorithm that integrates depth images into a voxel, based on
 camera pose trajectory and nonrigid correction produced by previous steps.
 
 + Matlab_Toolbox
 A Matlab toobox for evaluation of camera pose trajectory and global
 registration.
 
-+ In executable package
++ In the executable package
     * pcl_kinfu_largeScale_release.exe
     * pcl_kinfu_largeScale_mesh_output_release
 Executable files for creating intermediate point clouds and final mesh.
