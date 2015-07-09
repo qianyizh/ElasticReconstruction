@@ -46,8 +46,7 @@ The source code is released under MIT license.
 
 In general, you can do anything with the code for any purposes, with proper 
 attribution. If you do something interesting with the code, we'll be happy to 
-know about it. Feel free to contact us: Qian-Yi Zhou (Qianyi.Zhou@gmail.com), 
-Vladlen Koltun (vkoltun@gmail.com).
+know about it. Feel free to contact us.
 
 For more license information including citation instructions, refer to:
 http://redwood-data.org/indoor/pipeline.html
