@@ -1,40 +1,45 @@
-LATEST NEWS:
+===============================================================================
+=                       Robust Scene Reconstruction                           =
+===============================================================================
 
-1. The code is ready to use.
-I am going to update the document and the dataset soon.
+LATEST NEWS (7/9/2015):
 
-2. The code is now under MIT license.
-See the License section for details.
+1. Executable system available at http://redwood-data.org/indoor/tutorial.html
+
+2. Latest algorithms in our CVPR 2015 paper "Robust Reconstruction of Indoor
+Scenes" added to the package.
+
+3. Lots of useful things - data, evaluation tools, etc - on our new project
+website: http://redwood-data.org/indoor/
 
 ===============================================================================
-ElasticReconstruction: dense scene reconstruction with elastic fragments.
 
-===============================================================================
 Introduction
 
 This is an open source C++ implementation based on the technique presented in
 the following papers:
 
-Dense Scene Reconstruction with Points of Interest, SIGGRAPH 2013
-Qian-Yi Zhou and Vladlen Koltun
-
-Elastic Fragments for Dense Scene Reconstruction, ICCV 2013
-Qian-Yi Zhou, Stephen Miller and Vladlen Koltun
+Robust Reconstruction of Indoor Scenes, CVPR 2015
+Sungjoon Choi, Qian-Yi Zhou, and Vladlen Koltun
 
 Simultaneous Localization and Calibration: Self-Calibration of Consumer Depth 
 Cameras, CVPR 2014
 Qian-Yi Zhou and Vladlen Koltun
 
-Project page:
-http://www.stanford.edu/~qianyizh/projects/elasticreconstruction.html
-http://www.stanford.edu/~qianyizh/projects/scene.html
-Data page:
-http://www.stanford.edu/~qianyizh/projects/scenedata.html
+Elastic Fragments for Dense Scene Reconstruction, ICCV 2013
+Qian-Yi Zhou, Stephen Miller and Vladlen Koltun
+
+Dense Scene Reconstruction with Points of Interest, SIGGRAPH 2013
+Qian-Yi Zhou and Vladlen Koltun
+
+Main project page:
+http://redwood-data.org/indoor/
 
 This github repository is maintained by Qian-Yi Zhou (Qianyi.Zhou@gmail.com)
 Contact me or Vladlen Koltun (vkoltun@gmail.com) if you have any questions.
 
 ===============================================================================
+
 License
 
 The source code is released under MIT license.
@@ -44,59 +49,63 @@ attribution. If you do something interesting with the code, we'll be happy to
 know about it. Feel free to contact us: Qian-Yi Zhou (Qianyi.Zhou@gmail.com), 
 Vladlen Koltun (vkoltun@gmail.com).
 
-The data on our data page can be used for any purposes with proper attribution.
-I scanned the scenes and reconstructed them. Just use them if you like.
-
-Please cite our ICCV 2013 paper "Elastic Fragments for Dense Scene
-Reconstruction" and/or our CVPR 2014 paper "Simultaneous Localization and 
-Calibration: Self-Calibration of Consumer Depth Cameras" if you use our code 
-or data.
+For more license information including citation instructions, refer to:
+http://redwood-data.org/indoor/pipeline.html
 
 ===============================================================================
+
 Modules
 
++ GlobalRegistration
+A state-of-the-art global registration algorithm that aligns point clouds
+together.
+
++ GraphOptimizer
+Pose graph optimization that prunes false global registration results. See CVPR
+2015 paper for details.
+
 + FragmentOptimizer
-This is the main function of this package. The purpose is to estimate an 
-optimal nonrigid deformation for each fragment (individual point clouds) so
-as to minimize the alignment error. It takes fragments, dense correspondences, 
-and an initial camera pose trajectory as input, and outputs control lattices
-for the fragments.
+The core function that simultaneously optimizes point cloud poses and a
+nonrigid correction pattern. See CVPR 2014 and ICCV 2013 papers for details.
 
 + BuildCorrespondence
-This is a pre-processing step of FragmentOptimizer. It takes fragments and an
-initial camera pose trajectory as input, applies ICP registration and outputs
-dense correspondences between aligned fragment pairs.
+ICP refinement for point cloud pairs registered by GlobalRegistration module.
 
 + Integrate
-This is the final step of the pipeline. It takes the depth stream, a rough
-trajectory, and the deformed control lattices as the input, and output a voxel
-representing the final geometry
+An CPU-based algorithm that integrates depth images into a voxel, based on
+camera pose trajectory and nonrigid correction produced by previous steps.
+
++ Matlab_Toolbox
+A Matlab toobox for evaluation of camera pose trajectory and global
+registration.
+
++ In executable package
+    * pcl_kinfu_largeScale_release.exe
+    * pcl_kinfu_largeScale_mesh_output_release
+Executable files for creating intermediate point clouds and final mesh.
 
 ===============================================================================
+
 Quick Start
 
-Download the data package from:
-
-I will update this section very soon.
-
-===============================================================================
-Dependencies
-
-We strongly recommend you install Point Cloud Library (PCL) x64 for Windows.
-http://pointclouds.org/
-
-Although the main module (FragmentOptimizer) can be de-PCL-ed easily, it would
-save you a lot of trouble if you have experiences with PCL. Other modules are 
-all heavily relying on PCL.
-
-FragmentOptimizer uses SuiteSparse and a different version of Eigen. They both
-are included in the "external" directory under the project.
+See tutorial on this page:
+http://redwood-data.org/indoor/tutorial.html
 
 ===============================================================================
-Compilation
 
-We include project files for MSVS2010.
+Build Dependencies
 
-I will update this section very soon.
+We strongly recommend you *compile* Point Cloud Library (PCL) x64 with
+Visual Studio. http://pointclouds.org/
 
-==============================================================================
+SuiteSparse is required for solving large sparse matrices.
+https://github.com/PetterS/CXSparse
+
+ACML is required for SuiteSparse.
+http://developer.amd.com/tools-and-sdks/cpu-development/amd-core-math-library-acml/
+
+The compilation requires Visual Studio 2010 on a Windows 7/8.1 64bit system.
+
+We are not happy with the current compatibility issues. We are working on a new
+code release that will not depend on external libraries as much and will be
+much easier to compile. Stay tuned.
