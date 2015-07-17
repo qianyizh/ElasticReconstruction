@@ -9,8 +9,10 @@ LATEST NEWS (7/9/2015):
 2. Latest algorithms in our CVPR 2015 paper "Robust Reconstruction of Indoor
 Scenes" added to the package.
 
-3. Lots of useful things - data, evaluation tools, etc - on our new project
-website: http://redwood-data.org/indoor/
+3. Lots of useful things - software, data, evaluation tools, beautiful videos
+and pictures - are on:
+Project page: http://qianyi.info/scene.html
+New project page: http://redwood-data.org/indoor/
 
 ===============================================================================
 
@@ -32,8 +34,19 @@ Qian-Yi Zhou, Stephen Miller and Vladlen Koltun
 Dense Scene Reconstruction with Points of Interest, SIGGRAPH 2013
 Qian-Yi Zhou and Vladlen Koltun
 
-Main project page:
+Project pages:
+http://qianyi.info/scene.html
 http://redwood-data.org/indoor/
+
+Executable system:
+http://redwood-data.org/indoor/tutorial.html
+
+Data:
+http://qianyi.info/scenedata.html
+http://redwood-data.org/indoor/dataset.html
+
+Citation instructions:
+http://redwood-data.org/indoor/pipeline.html
 
 This github repository is maintained by Qian-Yi Zhou (Qianyi.Zhou@gmail.com)
 Contact me or Vladlen Koltun (vkoltun@gmail.com) if you have any questions.
@@ -47,9 +60,6 @@ The source code is released under MIT license.
 In general, you can do anything with the code for any purposes, with proper 
 attribution. If you do something interesting with the code, we'll be happy to 
 know about it. Feel free to contact us.
-
-For more license information including citation instructions, refer to:
-http://redwood-data.org/indoor/pipeline.html
 
 ===============================================================================
 
