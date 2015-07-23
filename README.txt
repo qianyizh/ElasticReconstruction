@@ -2,12 +2,12 @@
 =                       Robust Scene Reconstruction                           =
 ===============================================================================
 
-LATEST NEWS (7/9/2015):
+LATEST NEWS (7/22/2015):
 
-1. Executable system available at http://redwood-data.org/indoor/tutorial.html
+1. We have published my fork of PCL. It is a development version, for reference
+only. We don't provide any support. https://github.com/qianyizh/StanfordPCL
 
-2. Latest algorithms in our CVPR 2015 paper "Robust Reconstruction of Indoor
-Scenes" added to the package.
+2. Executable system available at http://redwood-data.org/indoor/tutorial.html
 
 3. Lots of useful things - software, data, evaluation tools, beautiful videos
 and pictures - are on:
@@ -60,6 +60,15 @@ The source code is released under MIT license.
 In general, you can do anything with the code for any purposes, with proper 
 attribution. If you do something interesting with the code, we'll be happy to 
 know about it. Feel free to contact us.
+
+We include code and libraries for some software not written by us, to ensure 
+easy compilation of the system. You should be aware that they can be released
+under different licenses:
+
+g2o <GraphOptimizer/external/g2o> - BSD license
+vertigo <GraphOptimizer/vertigo> - GPLv3 license
+SuiteSparse <FragmentOptimizer/external/SuiteSparse> - LGPL3+ license
+Eigen <FragmentOptimizer/external/Eigen> - MPL2 license
 
 ===============================================================================
 
