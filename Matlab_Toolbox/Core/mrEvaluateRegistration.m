@@ -48,3 +48,13 @@ function [ p ] = mrComputeTransformationError( trans, info )
     er = [ te; - qt( 2 : 4 )' ];
     p = er' * info * er / info( 1, 1 );
 end
+
+function [qout] = dcm2quat(DCM)
+% this is consistent with the matlab function in
+% the Aerospace Toolbox
+    qout = zeros(1,4);
+    qout(1) = 0.5 * sqrt(1 + DCM(1,1) + DCM(2,2) + DCM(3,3));
+    qout(2) = - (DCM(3,2) - DCM(2,3)) / ( 4 * qout(1) );
+    qout(3) = - (DCM(1,3) - DCM(3,1)) / ( 4 * qout(1) );
+    qout(4) = - (DCM(2,1) - DCM(1,2)) / ( 4 * qout(1) );
+end
